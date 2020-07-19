@@ -20,6 +20,7 @@
 
 " 快速添加、去除、修改pairs
     nnoremap <silent> ys :call <SID>addPairs()<CR>
+    nnoremap <silent> yS :call <SID>AddPairs()<CR>
     nnoremap <silent> ds :call <SID>delPairs()<CR>
     nnoremap <silent> cs :call <SID>changePairs()<CR>
     func! s:addPairs()
@@ -27,6 +28,18 @@
         if [left, right] != [0, 0]
             exe 'norm! wbi' . left
             exe 'norm! ea' . right
+        endif
+    endf
+    func! s:AddPairs()
+        let [left, right] = s:getLR()
+        if [left, right] != [0, 0]
+            if index(['"', "\'", '`'], left) != -1
+                exe 'norm! ^i' . left
+                exe 'norm! $a' . right
+            else
+                exe 'norm! o' . right
+                exe 'norm! kO' . left
+            endif
         endif
     endf
     func! s:delPairs()
@@ -44,7 +57,6 @@
         endif
     endf
     func! s:getLR()
-        echo '-- '
         let c = getchar()
         let c = c =~ '^\d\+$' ? nr2char(c) : ''
         let leftlist = ['(', '[', '{', '<', '"', "\'", '`']
