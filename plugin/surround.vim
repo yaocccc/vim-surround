@@ -4,24 +4,24 @@ endif
 let s:loaded = 1
 
 " select模式下快速添加pairs
-snoremap ' <c-g> :<c-u>call <SID>vaddPairs("'", "'")<cr>
-snoremap " <c-g> :<c-u>call <SID>vaddPairs('"', '"')<cr>
-snoremap ` <c-g> :<c-u>call <SID>vaddPairs('`', '`')<cr>
-snoremap { <c-g> :<c-u>call <SID>vaddPairs('{', '}')<cr>
-snoremap } <c-g> :<c-u>call <SID>vaddPairs('{', '}')<cr>
-snoremap [ <c-g> :<c-u>call <SID>vaddPairs('[', ']')<cr>
-snoremap ] <c-g> :<c-u>call <SID>vaddPairs('[', ']')<cr>
-snoremap ( <c-g> :<c-u>call <SID>vaddPairs('(', ')')<cr>
-snoremap ) <c-g> :<c-u>call <SID>vaddPairs('(', ')')<cr>
-xnoremap ' :<c-u>call <SID>vaddPairs("'", "'")<cr>
-xnoremap " :<c-u>call <SID>vaddPairs('"', '"')<cr>
-xnoremap ` :<c-u>call <SID>vaddPairs('`', '`')<cr>
-xnoremap { :<c-u>call <SID>vaddPairs('{', '}')<cr>
-xnoremap } :<c-u>call <SID>vaddPairs('{', '}')<cr>
-xnoremap [ :<c-u>call <SID>vaddPairs('[', ']')<cr>
-xnoremap ] :<c-u>call <SID>vaddPairs('[', ']')<cr>
-xnoremap ( :<c-u>call <SID>vaddPairs('(', ')')<cr>
-xnoremap ) :<c-u>call <SID>vaddPairs('(', ')')<cr>
+snoremap ' <c-g>:<c-u>call <SID>vaddPairs("'", "'")<cr>
+snoremap " <c-g>:<c-u>call <SID>vaddPairs('"', '"')<cr>
+snoremap ` <c-g>:<c-u>call <SID>vaddPairs('`', '`')<cr>
+snoremap { <c-g>:<c-u>call <SID>vaddPairs('{', '}')<cr>
+snoremap } <c-g>:<c-u>call <SID>vaddPairs('{', '}')<cr>
+snoremap [ <c-g>:<c-u>call <SID>vaddPairs('[', ']')<cr>
+snoremap ] <c-g>:<c-u>call <SID>vaddPairs('[', ']')<cr>
+snoremap ( <c-g>:<c-u>call <SID>vaddPairs('(', ')')<cr>
+snoremap ) <c-g>:<c-u>call <SID>vaddPairs('(', ')')<cr>
+xnoremap '      :<c-u>call <SID>vaddPairs("'", "'")<cr>
+xnoremap "      :<c-u>call <SID>vaddPairs('"', '"')<cr>
+xnoremap `      :<c-u>call <SID>vaddPairs('`', '`')<cr>
+xnoremap {      :<c-u>call <SID>vaddPairs('{', '}')<cr>
+xnoremap }      :<c-u>call <SID>vaddPairs('{', '}')<cr>
+xnoremap [      :<c-u>call <SID>vaddPairs('[', ']')<cr>
+xnoremap ]      :<c-u>call <SID>vaddPairs('[', ']')<cr>
+xnoremap (      :<c-u>call <SID>vaddPairs('(', ')')<cr>
+xnoremap )      :<c-u>call <SID>vaddPairs('(', ')')<cr>
 func! s:vaddPairs(left, right)
     let [l:col1, l:line1, l:col2, l:line2] = [col("'<"), line("'<"), col("'>"), line("'>")]
     let [l:line1_content, l:line2_content] = [getline(l:line1), getline(l:line2)]
