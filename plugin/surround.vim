@@ -25,7 +25,7 @@ xnoremap <silent> )      :<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
 func! SurroundVaddPairs(left, right, col)
     let [l:col1, l:line1, l:col2, l:line2] = [col("'<"), line("'<"), col("'>"), line("'>")]
     let [l:line1_content, l:line2_content] = [getline(l:line1), getline(l:line2)]
-    if l:line1 == l:line2
+    if l:line1 == l:line2 || !s:isSelectLines()
         let l:l_content = l:col1 - 2 >= 0 ? l:line1_content[: l:col1 - 2] : ''
         let l:c_content = l:line1_content[l:col1 - 1: l:col2 - 2]
         let l:r_content = l:line1_content[l:col2 - 1: ]
@@ -116,4 +116,8 @@ func! s:getEmptyStr(len)
         let l:str .= ' '
     endfor
     return l:str
+endf
+
+func! s:isSelectLines()
+    return col("'<") == 1 && col("'>") == len(getline(line("'>"))) + 1
 endf
