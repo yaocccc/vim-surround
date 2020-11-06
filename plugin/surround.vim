@@ -4,25 +4,25 @@ endif
 let s:loaded = 1
 
 " select模式下快速添加pairs
-snoremap <silent> ' <c-g>:<c-u>call <SID>vaddPairs("'", "'")<cr>
-snoremap <silent> " <c-g>:<c-u>call <SID>vaddPairs('"', '"')<cr>
-snoremap <silent> ` <c-g>:<c-u>call <SID>vaddPairs('`', '`')<cr>
-snoremap <silent> { <c-g>:<c-u>call <SID>vaddPairs('{', '}')<cr>
-snoremap <silent> } <c-g>:<c-u>call <SID>vaddPairs('{', '}')<cr>
-snoremap <silent> [ <c-g>:<c-u>call <SID>vaddPairs('[', ']')<cr>
-snoremap <silent> ] <c-g>:<c-u>call <SID>vaddPairs('[', ']')<cr>
-snoremap <silent> ( <c-g>:<c-u>call <SID>vaddPairs('(', ')')<cr>
-snoremap <silent> ) <c-g>:<c-u>call <SID>vaddPairs('(', ')')<cr>
-xnoremap <silent> '      :<c-u>call <SID>vaddPairs("'", "'")<cr>
-xnoremap <silent> "      :<c-u>call <SID>vaddPairs('"', '"')<cr>
-xnoremap <silent> `      :<c-u>call <SID>vaddPairs('`', '`')<cr>
-xnoremap <silent> {      :<c-u>call <SID>vaddPairs('{', '}')<cr>
-xnoremap <silent> }      :<c-u>call <SID>vaddPairs('{', '}')<cr>
-xnoremap <silent> [      :<c-u>call <SID>vaddPairs('[', ']')<cr>
-xnoremap <silent> ]      :<c-u>call <SID>vaddPairs('[', ']')<cr>
-xnoremap <silent> (      :<c-u>call <SID>vaddPairs('(', ')')<cr>
-xnoremap <silent> )      :<c-u>call <SID>vaddPairs('(', ')')<cr>
-func! s:vaddPairs(left, right)
+snoremap <silent> ' <c-g>:<c-u>call SurroundVaddPairs("'", "'", -1)<cr>
+snoremap <silent> " <c-g>:<c-u>call SurroundVaddPairs('"', '"', -1)<cr>
+snoremap <silent> ` <c-g>:<c-u>call SurroundVaddPairs('`', '`', -1)<cr>
+snoremap <silent> { <c-g>:<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
+snoremap <silent> } <c-g>:<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
+snoremap <silent> [ <c-g>:<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
+snoremap <silent> ] <c-g>:<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
+snoremap <silent> ( <c-g>:<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
+snoremap <silent> ) <c-g>:<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
+xnoremap <silent> '      :<c-u>call SurroundVaddPairs("'", "'", -1)<cr>
+xnoremap <silent> "      :<c-u>call SurroundVaddPairs('"', '"', -1)<cr>
+xnoremap <silent> `      :<c-u>call SurroundVaddPairs('`', '`', -1)<cr>
+xnoremap <silent> {      :<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
+xnoremap <silent> }      :<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
+xnoremap <silent> [      :<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
+xnoremap <silent> ]      :<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
+xnoremap <silent> (      :<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
+xnoremap <silent> )      :<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
+func! SurroundVaddPairs(left, right, col)
     let [l:col1, l:line1, l:col2, l:line2] = [col("'<"), line("'<"), col("'>"), line("'>")]
     let [l:line1_content, l:line2_content] = [getline(l:line1), getline(l:line2)]
     if l:line1 == l:line2
@@ -31,67 +31,89 @@ func! s:vaddPairs(left, right)
         let l:r_content = l:line1_content[l:col2 - 1: ]
         call setline(l:line1, l:l_content . a:left . l:c_content . a:right . l:r_content)
     else
-        let l:line1_l_content = l:col1 - 2 >= 0 ? l:line1_content[: l:col1 - 2] : ''
-        let l:line2_l_content = l:col2 - 2 >= 0 ? l:line2_content[: l:col2 - 2] : ''
-        let l:line1_r_content = l:line1_content[l:col1 - 1:]
-        let l:line2_r_content = l:line2_content[l:col2 - 1:]
-        call setline(l:line1, l:line1_l_content . a:left . l:line1_r_content)
-        call setline(l:line2, l:line2_l_content . a:right . l:line2_r_content)
+        let l:col = a:col >= 0 ? a:col : s:getCol(l:line1, l:line2)
+        for num in range(l:line1, l:line2)
+            let l:line = getline(num)
+            call setline(num, s:getEmptyStr(&shiftwidth) . l:line)
+        endfor
+        call appendbufline('%', l:line1 - 1, s:getEmptyStr(l:col) . a:left)
+        call appendbufline('%', l:line2 + 1, s:getEmptyStr(l:col) . a:right)
     endif
 endf
 
 " 快速添加、去除、修改pairs
-nnoremap <silent> ys :call <SID>addPairs()<CR>
-nnoremap <silent> yS :call <SID>AddPairs()<CR>
-nnoremap <silent> ds :call <SID>delPairs()<CR>
-nnoremap <silent> cs :call <SID>changePairs()<CR>
-func! s:addPairs()
-    let [l:left, l:right] = s:getLR()
+nnoremap <silent> ys :call SurroundAddPairs(SurroundGetLR())<CR>
+nnoremap <silent> yS :call SurroundAddLinePairs(SurroundGetLR())<CR>
+nnoremap <silent> ds :call SurroundDelPairs(SurroundGetLR())<CR>
+nnoremap <silent> cs :call SurroundChangePairs(SurroundGetLR(), SurroundGetLR())<CR>
+func! SurroundAddPairs(pairs)
+    let [l:left, l:right] = a:pairs
     if [l:left, l:right] != [0, 0]
         exe 'norm! wbi' . l:left
         exe 'norm! ea' . l:right
     endif
 endf
-func! s:AddPairs()
-    let [l:left, l:right] = s:getLR()
-    if [l:left, l:right] != [0, 0]
+func! SurroundAddLinePairs(pairs)
+    let [l:left, l:right] = a:pairs
+    if  [l:left, l:right] != [0, 0]
         if index(['"', "\'", '`'], l:left) != -1
             exe 'norm! ^i' . l:left
             exe 'norm! $a' . l:right
         else
-            exe 'norm! o' . l:right
-            exe 'norm! kO' . l:left
+            let  l:line = line('.')
+            let  l:col = s:getCol(l:line, l:line)
+            call setline(l:line, s:getEmptyStr(&shiftwidth) . getline(l:line))
+            call appendbufline('%', l:line - 1, s:getEmptyStr(col) . l:left)
+            call appendbufline('%', l:line + 1, s:getEmptyStr(col) . l:right)
         endif
     endif
 endf
-func! s:delPairs()
-    let [l:left, l:right] = s:getLR()
-    if [l:left, l:right] != [0, 0]
+func! SurroundDelPairs(pairs)
+    let [l:left, l:right] = a:pairs
+    if  [l:left, l:right] != [0, 0]
         exe 'norm! F' . l:left . 'xf' . l:right . 'x'
     endif
 endf
-func! s:changePairs()
-    let [l:left, l:right] = s:getLR()
-    let [l:left2, l:right2] = s:getLR()
+func! SurroundChangePairs(pairs1, pairs2)
+    let [l:left, l:right] = a:pairs1
+    let [l:left2, l:right2] = a:pairs2
     redraw!
     if [l:left, l:right] != [0, 0] && [l:left2, l:right2] != [0, 0]
         exe 'norm! F' . l:left . 'r' . l:left2 . 'f' . l:right . 'r' . l:right2
     endif
 endf
-func! s:getLR()
+func! SurroundGetLR()
     let l:c = getchar()
     let l:c = l:c =~ '^\d\+$' ? nr2char(l:c) : ''
     let l:leftlist = ['(', '[', '{', '<', '"', "\'", '`']
     let l:rightlist = [')', ']', '}', '>', '"', "\'", '`']
     let [l:left, l:right] = [0, 0]
-    let l:lindex = index(l:leftlist, c)
-    let l:rindex = index(l:rightlist, c)
+    let l:lindex = index(l:leftlist, l:c)
+    let l:rindex = index(l:rightlist, l:c)
     if l:lindex != -1
-        let l:left = c
+        let l:left = l:c
         let l:right = l:rightlist[l:lindex]
     elseif l:rindex != -1
         let l:left = l:leftlist[l:rindex]
         let l:right = l:c
     endif
     return [l:left, l:right]
+endf
+
+func! s:getCol(num1, num2)
+    let l:col = 999
+    for num in range(a:num1, a:num2)
+        let l:line = getline(num)
+        let l:line2 = substitute(l:line, '^\s*', '', '')
+        let l:col = trim(l:line) ==# '' ? l:col : min([l:col, len(l:line) - len(l:line2)])
+    endfor
+    return col
+endf
+
+func! s:getEmptyStr(len)
+    let l:str = ''
+    for i in range(1, a:len)
+        let l:str .= ' '
+    endfor
+    return l:str
 endf

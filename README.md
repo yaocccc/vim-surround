@@ -3,7 +3,7 @@
 ## usage
 
 ```surround
-1. select some content then input (){}[]<>'"` will add surround
+1. select some content then input (){}[]'"` will add surround
 2. ys + surround will add surround to current word
 3. yS + surround will add surround to current line
 4. ds + surround will del surround
