@@ -3,119 +3,145 @@ if exists('s:loaded')
 endif
 let s:loaded = 1
 
-" select模式下快速添加pairs
-snoremap <silent> ' <c-g>:<c-u>call SurroundVaddPairs("'", "'", -1)<cr>
-snoremap <silent> " <c-g>:<c-u>call SurroundVaddPairs('"', '"', -1)<cr>
-snoremap <silent> ` <c-g>:<c-u>call SurroundVaddPairs('`', '`', -1)<cr>
-snoremap <silent> { <c-g>:<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
-snoremap <silent> } <c-g>:<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
-snoremap <silent> [ <c-g>:<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
-snoremap <silent> ] <c-g>:<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
-snoremap <silent> ( <c-g>:<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
-snoremap <silent> ) <c-g>:<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
-xnoremap <silent> '      :<c-u>call SurroundVaddPairs("'", "'", -1)<cr>
-xnoremap <silent> "      :<c-u>call SurroundVaddPairs('"', '"', -1)<cr>
-xnoremap <silent> `      :<c-u>call SurroundVaddPairs('`', '`', -1)<cr>
-xnoremap <silent> {      :<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
-xnoremap <silent> }      :<c-u>call SurroundVaddPairs('{', '}', -1)<cr>
-xnoremap <silent> [      :<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
-xnoremap <silent> ]      :<c-u>call SurroundVaddPairs('[', ']', -1)<cr>
-xnoremap <silent> (      :<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
-xnoremap <silent> )      :<c-u>call SurroundVaddPairs('(', ')', -1)<cr>
-func! SurroundVaddPairs(left, right, col)
-    let [l:col1, l:line1, l:col2, l:line2] = [col("'<"), line("'<"), col("'>"), line("'>")]
-    let [l:line1_content, l:line2_content] = [getline(l:line1), getline(l:line2)]
-    if l:line1 == l:line2 || !s:isSelectLines()
-        let l:l_content = l:col1 - 2 >= 0 ? l:line1_content[: l:col1 - 2] : ''
-        let l:c_content = l:line1_content[l:col1 - 1: l:col2 - 2]
-        let l:r_content = l:line1_content[l:col2 - 1: ]
-        call setline(l:line1, l:l_content . a:left . l:c_content . a:right . l:r_content)
-    else
-        let l:col = a:col >= 0 ? a:col : s:getCol(l:line1, l:line2)
-        for num in range(l:line1, l:line2)
-            let l:line = getline(num)
-            call setline(num, s:getEmptyStr(&shiftwidth) . l:line)
-        endfor
-        call appendbufline('%', l:line1 - 1, s:getEmptyStr(l:col) . a:left)
-        call appendbufline('%', l:line2 + 1, s:getEmptyStr(l:col) . a:right)
-    endif
-endf
+let s:use_default_surround_config = get(g:, 'use_default_surround_config', 1)
+if s:use_default_surround_config == 1
+    " 快速添加、去除、修改pairs
+    " add、remove、update pairs
+    nnoremap <silent> ys :call SurroundAddPairs(SurroundGetLR())<CR>
+    nnoremap <silent> yS :call SurroundAddLinePairs(SurroundGetLR())<CR>
+    nnoremap <silent> ds :call SurroundDelPairs(SurroundGetLR())<CR>
+    nnoremap <silent> cs :call SurroundChangePairs(SurroundGetLR(), SurroundGetLR())<CR>
 
-" 快速添加、去除、修改pairs
-nnoremap <silent> ys :call SurroundAddPairs(SurroundGetLR())<CR>
-nnoremap <silent> yS :call SurroundAddLinePairs(SurroundGetLR())<CR>
-nnoremap <silent> ds :call SurroundDelPairs(SurroundGetLR())<CR>
-nnoremap <silent> cs :call SurroundChangePairs(SurroundGetLR(), SurroundGetLR())<CR>
-func! SurroundAddPairs(pairs)
-    let [l:left, l:right] = a:pairs
-    if [l:left, l:right] != [0, 0]
-        exe 'norm! wbi' . l:left
-        exe 'norm! ea' . l:right
-    endif
-endf
-func! SurroundAddLinePairs(pairs)
-    let [l:left, l:right] = a:pairs
-    if  [l:left, l:right] != [0, 0]
-        if index(['"', "\'", '`'], l:left) != -1
-            exe 'norm! ^i' . l:left
-            exe 'norm! $a' . l:right
+    " visual模式下快速添加pairs
+    " visual mode - add pairs
+    snoremap <silent> ' <c-g>:<c-u>call SurroundVaddPairs("'", "'")<cr>
+    snoremap <silent> " <c-g>:<c-u>call SurroundVaddPairs('"', '"')<cr>
+    snoremap <silent> ` <c-g>:<c-u>call SurroundVaddPairs('`', '`')<cr>
+    snoremap <silent> { <c-g>:<c-u>call SurroundVaddPairs('{', '}')<cr>
+    snoremap <silent> } <c-g>:<c-u>call SurroundVaddPairs('{', '}')<cr>
+    snoremap <silent> [ <c-g>:<c-u>call SurroundVaddPairs('[', ']')<cr>
+    snoremap <silent> ] <c-g>:<c-u>call SurroundVaddPairs('[', ']')<cr>
+    snoremap <silent> ( <c-g>:<c-u>call SurroundVaddPairs('(', ')')<cr>
+    snoremap <silent> ) <c-g>:<c-u>call SurroundVaddPairs('(', ')')<cr>
+    xnoremap <silent> '      :<c-u>call SurroundVaddPairs("'", "'")<cr>
+    xnoremap <silent> "      :<c-u>call SurroundVaddPairs('"', '"')<cr>
+    xnoremap <silent> `      :<c-u>call SurroundVaddPairs('`', '`')<cr>
+    xnoremap <silent> {      :<c-u>call SurroundVaddPairs('{', '}')<cr>
+    xnoremap <silent> }      :<c-u>call SurroundVaddPairs('{', '}')<cr>
+    xnoremap <silent> [      :<c-u>call SurroundVaddPairs('[', ']')<cr>
+    xnoremap <silent> ]      :<c-u>call SurroundVaddPairs('[', ']')<cr>
+    xnoremap <silent> (      :<c-u>call SurroundVaddPairs('(', ')')<cr>
+    xnoremap <silent> )      :<c-u>call SurroundVaddPairs('(', ')')<cr>
+endif
+
+" visual mode add pairs
+func! SurroundVaddPairs(left, right)
+    let [c1, l1, c2, l2] = [col("'<"), line("'<"), col("'>"), line("'>")]
+    let [content1, content2] = [getline(l1), getline(l2)]
+    if s:isSelectLines()
+        let c = s:getCol(l1, l2)
+        for num in range(l1, l2)
+            let line = getline(num)
+            call setline(num, s:getEmptyStr(&shiftwidth) . line)
+        endfor
+        echo [l1, l2]
+        call appendbufline('%', l1 - 1, s:getEmptyStr(c) . a:left)
+        call appendbufline('%', l2 + 1, s:getEmptyStr(c) . a:right)
+    else 
+        if l1 == l2
+            let content_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
+            let content_2 = content1[c1 - 1: c2 - 2]
+            let content_3 = content1[c2 - 1: ]
+            call setline(l1, content_1 . a:left . content_2 . a:right . content_3)
         else
-            let  l:line = line('.')
-            let  l:col = s:getCol(l:line, l:line)
-            call setline(l:line, s:getEmptyStr(&shiftwidth) . getline(l:line))
-            call appendbufline('%', l:line - 1, s:getEmptyStr(col) . l:left)
-            call appendbufline('%', l:line + 1, s:getEmptyStr(col) . l:right)
+            let content1_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
+            let content2_1 = c2 - 2 >= 0 ? content2[: c2 - 2] : ''
+            let content1_2 = content1[c1 - 1:]
+            let content2_2 = content2[c2 - 1:]
+            call setline(l1, content1_1 . a:left . content1_2)
+            call setline(l2, content2_1 . a:right . content2_2)
         endif
     endif
 endf
-func! SurroundDelPairs(pairs)
-    let [l:left, l:right] = a:pairs
-    if  [l:left, l:right] != [0, 0]
-        exe 'norm! F' . l:left . 'xf' . l:right . 'x'
+
+" normal mode add pairs
+func! SurroundAddPairs(pairs)
+    let [left, right] = a:pairs
+    if [left, right] != [0, 0]
+        exe 'norm! wbi' . left
+        exe 'norm! ea' . right
     endif
-endf
-func! SurroundChangePairs(pairs1, pairs2)
-    let [l:left, l:right] = a:pairs1
-    let [l:left2, l:right2] = a:pairs2
-    redraw!
-    if [l:left, l:right] != [0, 0] && [l:left2, l:right2] != [0, 0]
-        exe 'norm! F' . l:left . 'r' . l:left2 . 'f' . l:right . 'r' . l:right2
-    endif
-endf
-func! SurroundGetLR()
-    let l:c = getchar()
-    let l:c = l:c =~ '^\d\+$' ? nr2char(l:c) : ''
-    let l:leftlist = ['(', '[', '{', '<', '"', "\'", '`']
-    let l:rightlist = [')', ']', '}', '>', '"', "\'", '`']
-    let [l:left, l:right] = [0, 0]
-    let l:lindex = index(l:leftlist, l:c)
-    let l:rindex = index(l:rightlist, l:c)
-    if l:lindex != -1
-        let l:left = l:c
-        let l:right = l:rightlist[l:lindex]
-    elseif l:rindex != -1
-        let l:left = l:leftlist[l:rindex]
-        let l:right = l:c
-    endif
-    return [l:left, l:right]
 endf
 
-func! s:getCol(num1, num2)
-    let l:col = 999
-    for num in range(a:num1, a:num2)
-        let l:line = getline(num)
-        let l:line2 = substitute(l:line, '^\s*', '', '')
-        let l:col = trim(l:line) ==# '' ? l:col : min([l:col, len(l:line) - len(l:line2)])
+" normal mode line add pairs
+func! SurroundAddLinePairs(pairs)
+    let [left, right] = a:pairs
+    if  [left, right] != [0, 0]
+        if index(['"', "\'", '`'], left) != -1
+            exe 'norm! ^i' . left
+            exe 'norm! $a' . right
+        else
+            let  l = line('.')
+            let  col = s:getCol(l, l)
+            call setline(l, s:getEmptyStr(&shiftwidth) . getline(l))
+            call appendbufline('%', l - 1, s:getEmptyStr(col) . left)
+            call appendbufline('%', l + 1, s:getEmptyStr(col) . right)
+        endif
+    endif
+endf
+
+" normal mode delete pairs
+func! SurroundDelPairs(pairs)
+    let [left, right] = a:pairs
+    if  [left, right] != [0, 0]
+        exe 'norm! F' . left . 'xf' . right . 'x'
+    endif
+endf
+
+" normal mode change pairs
+func! SurroundChangePairs(pairs1, pairs2)
+    let [left, right] = a:pairs1
+    let [left2, right2] = a:pairs2
+    redraw!
+    if [left, right] != [0, 0] && [left2, right2] != [0, 0]
+        exe 'norm! F' . left . 'r' . left2 . 'f' . right . 'r' . right2
+    endif
+endf
+
+func! SurroundGetLR()
+    let c = getchar()
+    let c = c =~ '^\d\+$' ? nr2char(c) : ''
+    let leftlist = ['(', '[', '{', '<', '"', "\'", '`']
+    let rightlist = [')', ']', '}', '>', '"', "\'", '`']
+    let [left, right] = [0, 0]
+    let lindex = index(leftlist, c)
+    let rindex = index(rightlist, c)
+    if lindex != -1
+        let left = c
+        let right = rightlist[lindex]
+    elseif rindex != -1
+        let left = leftlist[rindex]
+        let right = c
+    endif
+    return [left, right]
+endf
+
+func! s:getCol(n1, n2)
+    let c = 999
+    for num in range(a:n1, a:n2)
+        let pre = getline(num)
+        let after = substitute(pre, '^\s*', '', '')
+        let c = trim(pre) ==# '' ? c : min([c, len(pre) - len(after)])
     endfor
-    return col
+    return c
 endf
 
 func! s:getEmptyStr(len)
-    let l:str = ''
+    let str = ''
     for i in range(1, a:len)
-        let l:str .= ' '
+        let str .= ' '
     endfor
-    return l:str
+    return str
 endf
 
 func! s:isSelectLines()
