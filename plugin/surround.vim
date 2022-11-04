@@ -40,27 +40,57 @@ func! SurroundVaddPairs(left, right)
     let c2 = &selection == "exclusive" ? c2 - 1 : c2
     let [content1, content2] = [getline(l1), getline(l2)]
     if s:isSelectLines()
-        let c = s:getCol(l1, l2)
-        for num in range(l1, l2)
-            let line = getline(num)
-            call setline(num, s:getEmptyStr(&shiftwidth) . line)
-        endfor
-        echo [l1, l2]
-        call appendbufline('%', l1 - 1, s:getEmptyStr(c) . a:left)
-        call appendbufline('%', l2 + 1, s:getEmptyStr(c) . a:right)
+
+        " if getline(l1 - 1) = \s*a:left && getline(l2 + 1) = \s*[a:right] then remove pairs
+        if getline(l1 - 1) =~# "\s*" . a:left && getline(l2 + 1) =~# "\s*" . a:right
+            call deletebufline('%', l2 + 1)
+            call deletebufline('%', l1 - 1)
+            normal! gv<
+        else
+            let emptyStr = s:getEmptyStr(s:getCol(l1, l2))
+            call appendbufline('%', l1 - 1, emptyStr . a:left)
+            call appendbufline('%', l2 + 1, emptyStr . a:right)
+            normal! gv>
+        endif
     else 
         if l1 == l2
             let content_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
             let content_2 = content1[c1 - 1: c2 - 1]
             let content_3 = content1[c2: ]
-            call setline(l1, content_1 . a:left . content_2 . a:right . content_3)
+
+            " if content_1 endwith(a:left) && content_3 startwith(a:right) then remove pairs
+            let afterac = "b"
+            if content_1 =~ a:left . '$' && content_3 =~ '^' . a:right
+                let content_1 = substitute(content_1, a:left . '$', '', '')
+                let content_3 = substitute(content_3, '^' . a:right, '', '')
+            else
+                let content_1 = content_1 . a:left
+                let content_3 = a:right . content_3
+                let afterac = "w"
+            end
+
+            call setline(l1, content_1 . content_2 . content_3)
+            execute("normal! " . afterac)
         else
             let content1_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
             let content2_1 = c2 - 1 >= 0 ? content2[: c2 - 1] : ''
             let content1_2 = content1[c1 - 1:]
             let content2_2 = content2[c2:]
-            call setline(l1, content1_1 . a:left . content1_2)
-            call setline(l2, content2_1 . a:right . content2_2)
+
+            " if content1_1 endwith(a:left) && content2_2 startwith(a:right) then remove pairs
+            let afterac = ""
+            if content1_1 =~ a:left . '$' && content2_2 =~ '^' . a:right
+                let content1_1 = substitute(content1_1, a:left . '$', '', '')
+                let content2_2 = substitute(content2_2, '^' . a:right, '', '')
+            else
+                let content1_1 = content1_1 . a:left
+                let content2_2 = a:right . content2_2
+                let afterac = "w"
+            end
+
+            call setline(l1, content1_1 . content1_2)
+            call setline(l2, content2_1 . content2_2)
+            if afterac != "" | execute("normal! " . afterac) | endif
         endif
     endif
 endf
