@@ -41,8 +41,8 @@ func! SurroundVaddPairs(left, right)
     let [content1, content2] = [getline(l1), getline(l2)]
     if s:isSelectLines()
 
-        " if getline(l1 - 1) = \s*a:left && getline(l2 + 1) = \s*[a:right] then remove pairs
-        if getline(l1 - 1) =~# "\s*" . a:left && getline(l2 + 1) =~# "\s*" . a:right
+        " if getline(l1 - 1) = ^\s*[a:left]$ && getline(l2 + 1) = ^\s*[a:right]$ then remove pairs
+        if getline(l1 - 1) =~# '^\s*' . a:left . '$' && getline(l2 + 1) =~# '^\s*' . a:right . '$'
             call deletebufline('%', l2 + 1)
             call deletebufline('%', l1 - 1)
             normal! gv<
