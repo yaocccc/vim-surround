@@ -37,6 +37,7 @@ endif
 " visual mode add pairs
 func! SurroundVaddPairs(left, right)
     let [c1, l1, c2, l2] = [col("'<"), line("'<"), col("'>"), line("'>")]
+    let c2 = &selection == "exclusive" ? c2 - 1 : c2
     let [content1, content2] = [getline(l1), getline(l2)]
     if s:isSelectLines()
         let c = s:getCol(l1, l2)
@@ -50,14 +51,14 @@ func! SurroundVaddPairs(left, right)
     else 
         if l1 == l2
             let content_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
-            let content_2 = content1[c1 - 1: c2 - 2]
-            let content_3 = content1[c2 - 1: ]
+            let content_2 = content1[c1 - 1: c2 - 1]
+            let content_3 = content1[c2: ]
             call setline(l1, content_1 . a:left . content_2 . a:right . content_3)
         else
             let content1_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
-            let content2_1 = c2 - 2 >= 0 ? content2[: c2 - 2] : ''
+            let content2_1 = c2 - 1 >= 0 ? content2[: c2 - 1] : ''
             let content1_2 = content1[c1 - 1:]
-            let content2_2 = content2[c2 - 1:]
+            let content2_2 = content2[c2:]
             call setline(l1, content1_1 . a:left . content1_2)
             call setline(l2, content2_1 . a:right . content2_2)
         endif
