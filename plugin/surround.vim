@@ -4,6 +4,7 @@ endif
 let s:loaded = 1
 
 let s:use_default_surround_config = get(g:, 'use_default_surround_config', 1)
+let s:use_toggle_surround = get(g:, 'use_toggle_surround', 1)
 if s:use_default_surround_config == 1
     " 快速添加、去除、修改pairs
     " add、remove、update pairs
@@ -42,7 +43,7 @@ func! SurroundVaddPairs(left, right)
     if s:isSelectLines()
 
         " if getline(l1 - 1) = ^\s*[a:left]$ && getline(l2 + 1) = ^\s*[a:right]$ then remove pairs
-        if getline(l1 - 1) =~# '^\s*' . a:left . '$' && getline(l2 + 1) =~# '^\s*' . a:right . '$'
+        if s:use_toggle_surround && getline(l1 - 1) =~# '^\s*' . a:left . '$' && getline(l2 + 1) =~# '^\s*' . a:right . '$'
             call deletebufline('%', l2 + 1)
             call deletebufline('%', l1 - 1)
             normal! gv<
@@ -60,7 +61,7 @@ func! SurroundVaddPairs(left, right)
 
             " if content_1 endwith(a:left) && content_3 startwith(a:right) then remove pairs
             let afterac = "b"
-            if content_1 =~ a:left . '$' && content_3 =~ '^' . a:right
+            if s:use_toggle_surround && content_1 =~ a:left . '$' && content_3 =~ '^' . a:right
                 let content_1 = substitute(content_1, a:left . '$', '', '')
                 let content_3 = substitute(content_3, '^' . a:right, '', '')
             else
@@ -79,7 +80,7 @@ func! SurroundVaddPairs(left, right)
 
             " if content1_1 endwith(a:left) && content2_2 startwith(a:right) then remove pairs
             let afterac = ""
-            if content1_1 =~ a:left . '$' && content2_2 =~ '^' . a:right
+            if s:use_toggle_surround && content1_1 =~ a:left . '$' && content2_2 =~ '^' . a:right
                 let content1_1 = substitute(content1_1, a:left . '$', '', '')
                 let content2_2 = substitute(content2_2, '^' . a:right, '', '')
             else

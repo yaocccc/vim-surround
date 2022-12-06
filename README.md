@@ -20,6 +20,9 @@ select some content then input (){}[]'"` will add surround
 如果你不想使用默认的按键配置，你可以设置 let g:use_default_surround_config = 0, 并且自定义map
 if needn't use default config, you should let g:use_default_surround_config = 0, and set maps
 
+如果你不想使用toggle功能，你可以设置 let g:use_toggle_surround = 0
+if needn't use toggle func, you should let g:use_toggle_surround = 0
+
 默认配置
 default config
 
