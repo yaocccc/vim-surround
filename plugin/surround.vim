@@ -4,7 +4,6 @@ endif
 let s:loaded = 1
 
 let s:use_default_surround_config = get(g:, 'use_default_surround_config', 1)
-let s:use_toggle_surround = get(g:, 'use_toggle_surround', 1)
 if s:use_default_surround_config == 1
     " 快速添加、去除、修改pairs
     " add、remove、update pairs
@@ -38,61 +37,17 @@ endif
 " visual mode add pairs
 func! SurroundVaddPairs(left, right)
     let [c1, l1, c2, l2] = [col("'<"), line("'<"), col("'>"), line("'>")]
-    let c2 = &selection == "exclusive" ? c2 - 1 : c2
-    let [content1, content2] = [getline(l1), getline(l2)]
     if s:isSelectLines()
-
-        " if getline(l1 - 1) = ^\s*[a:left]$ && getline(l2 + 1) = ^\s*[a:right]$ then remove pairs
-        if s:use_toggle_surround && getline(l1 - 1) =~# '^\s*' . a:left . '$' && getline(l2 + 1) =~# '^\s*' . a:right . '$'
-            call deletebufline('%', l2 + 1)
-            call deletebufline('%', l1 - 1)
-            normal! gv<
-        else
-            let emptyStr = s:getEmptyStr(s:getCol(l1, l2))
-            call appendbufline('%', l1 - 1, emptyStr . a:left)
-            call appendbufline('%', l2 + 1, emptyStr . a:right)
-            normal! gv>
-        endif
+        let emptyStr = s:getEmptyStr(s:getCol(l1, l2))
+        call appendbufline('%', l1 - 1, emptyStr . a:left)
+        call appendbufline('%', l2 + 1, emptyStr . a:right)
+        normal! gv>
     else 
-        if l1 == l2
-            let content_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
-            let content_2 = content1[c1 - 1: c2 - 1]
-            let content_3 = content1[c2: ]
-
-            " if content_1 endwith(a:left) && content_3 startwith(a:right) then remove pairs
-            let afterac = "b"
-            if s:use_toggle_surround && content_1 =~ a:left . '$' && content_3 =~ '^' . a:right
-                let content_1 = substitute(content_1, a:left . '$', '', '')
-                let content_3 = substitute(content_3, '^' . a:right, '', '')
-            else
-                let content_1 = content_1 . a:left
-                let content_3 = a:right . content_3
-                let afterac = "w"
-            end
-
-            call setline(l1, content_1 . content_2 . content_3)
-            execute("normal! " . afterac)
-        else
-            let content1_1 = c1 - 2 >= 0 ? content1[: c1 - 2] : ''
-            let content2_1 = c2 - 1 >= 0 ? content2[: c2 - 1] : ''
-            let content1_2 = content1[c1 - 1:]
-            let content2_2 = content2[c2:]
-
-            " if content1_1 endwith(a:left) && content2_2 startwith(a:right) then remove pairs
-            let afterac = ""
-            if s:use_toggle_surround && content1_1 =~ a:left . '$' && content2_2 =~ '^' . a:right
-                let content1_1 = substitute(content1_1, a:left . '$', '', '')
-                let content2_2 = substitute(content2_2, '^' . a:right, '', '')
-            else
-                let content1_1 = content1_1 . a:left
-                let content2_2 = a:right . content2_2
-                let afterac = "w"
-            end
-
-            call setline(l1, content1_1 . content1_2)
-            call setline(l2, content2_1 . content2_2)
-            if afterac != "" | execute("normal! " . afterac) | endif
-        endif
+        call cursor(l2, c2)
+        call execute('normal! a' . a:right)
+        call cursor(l1, c1)
+        call execute('normal! i' . a:left)
+        normal! w
     endif
 endf
 
